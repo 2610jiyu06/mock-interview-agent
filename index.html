@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mock Interview Agent | Computer Engineering Project</title>
+  <meta name="description" content="AI-Powered Technical and HR Mock Interview Practice Platform for Computer Engineering Students">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Global Application Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <!-- Graduation / Tech Logo SVG -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Mock Interview Agent</h1>
+          <p class="brand-subtitle">Computer Engineering • Project Portal</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Engine Status Badge -->
+        <button id="engine-status-btn" class="status-badge {{ status.badge_color }}" title="Click to view engine details">
+          <span class="status-dot"></span>
+          <span id="engine-status-text">{{ status.mode_label }}</span>
+          <svg class="info-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="main-content">
+    
+    <!-- ================================================================= -->
+    <!-- VIEW 1: HOME & SETUP VIEW -->
+    <!-- ================================================================= -->
+    <section id="view-setup" class="view-section active">
+      <div class="hero-card">
+        <div class="hero-badge">3rd-Year Capstone Project</div>
+        <h2 class="hero-title">Prepare for Tech &amp; HR Interviews with Instant Structured Feedback</h2>
+        <p class="hero-desc">
+          Select your target engineering role, difficulty, and interview focus. 
+          Each session includes <strong>5 focused questions</strong>, instant scoring out of 10, strengths, areas for improvement, and exemplary model answers.
+        </p>
+
+        <!-- Mode Notification Banner -->
+        <div id="mode-alert-banner" class="alert-banner {{ 'demo' if status.mode == 'demo' else 'ai' }}">
+          <div class="alert-icon">
+            {% if status.mode == 'demo' %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            {% else %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            {% endif %}
+          </div>
+          <div class="alert-body">
+            <strong>{{ "Demo Mode Active:" if status.mode == 'demo' else "AI Mode Active:" }}</strong>
+            <span id="banner-notice-text">{{ status.notice }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interview Configuration Form Card -->
+      <div class="config-card">
+        <h3 class="card-section-title">Configure Your Interview Session</h3>
+
+        <form id="setup-form" onsubmit="event.preventDefault(); startInterviewSession();">
+          <!-- Step 1: Target Role -->
+          <div class="form-group">
+            <label class="form-label" for="role-select">
+              1. Target Engineering Role
+              <span class="required-indicator">*</span>
+            </label>
+            <div class="role-grid">
+              <label class="selection-card">
+                <input type="radio" name="role" value="Java Developer" checked onchange="toggleCustomRoleInput(false)">
+                <div class="card-content">
+                  <div class="role-icon java-icon">☕</div>
+                  <div class="role-name">Java Developer</div>
+                  <div class="role-hint">JVM, OOP, Collections, Concurrency &amp; Spring</div>
+                </div>
+              </label>
+
+              <label class="selection-card">
+                <input type="radio" name="role" value="Web Developer" onchange="toggleCustomRoleInput(false)">
+                <div class="card-content">
+                  <div class="role-icon web-icon">🌐</div>
+                  <div class="role-name">Web Developer</div>
+                  <div class="role-hint">HTML5, CSS3, Modern JS, APIs &amp; Architecture</div>
+                </div>
+              </label>
+
+              <label class="selection-card">
+                <input type="radio" name="role" value="Software Developer" onchange="toggleCustomRoleInput(false)">
+                <div class="card-content">
+                  <div class="role-icon swe-icon">💻</div>
+                  <div class="role-name">Software Developer</div>
+                  <div class="role-hint">Data Structures, Algorithms, System Design &amp; SOLID</div>
+                </div>
+              </label>
+
+              <label class="selection-card">
+                <input type="radio" name="role" value="Other" onchange="toggleCustomRoleInput(true)">
+                <div class="card-content">
+                  <div class="role-icon other-icon">⚙️</div>
+                  <div class="role-name">Other Role</div>
+                  <div class="role-hint">Specify custom domain (e.g. Data, DevOps, Mobile)</div>
+                </div>
+              </label>
+            </div>
+
+            <!-- Custom Role Input (revealed when 'Other' selected) -->
+            <div id="custom-role-wrapper" class="custom-input-box hidden">
+              <label class="sub-label" for="custom-role-input">Specify Your Custom Role:</label>
+              <input type="text" id="custom-role-input" class="form-input" placeholder="e.g. Cloud Engineer, Android Developer, ML Engineer" maxlength="60">
+            </div>
+          </div>
+
+          <!-- Step 2: Interview Type & Difficulty (Grid) -->
+          <div class="form-row-2col">
+            <!-- Interview Type -->
+            <div class="form-group">
+              <label class="form-label">
+                2. Interview Type
+                <span class="required-indicator">*</span>
+              </label>
+              <div class="pill-selector">
+                <label class="pill-option">
+                  <input type="radio" name="interview_type" value="Technical" checked>
+                  <span class="pill-label">Technical</span>
+                </label>
+                <label class="pill-option">
+                  <input type="radio" name="interview_type" value="HR">
+                  <span class="pill-label">HR / Behavioral</span>
+                </label>
+                <label class="pill-option">
+                  <input type="radio" name="interview_type" value="Mixed">
+                  <span class="pill-label">Mixed (3 Tech + 2 HR)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Difficulty Level -->
+            <div class="form-group">
+              <label class="form-label">
+                3. Difficulty Level
+                <span class="required-indicator">*</span>
+              </label>
+              <div class="pill-selector">
+                <label class="pill-option">
+                  <input type="radio" name="difficulty" value="Beginner" checked>
+                  <span class="pill-label">Beginner</span>
+                </label>
+                <label class="pill-option">
+                  <input type="radio" name="difficulty" value="Intermediate">
+                  <span class="pill-label">Intermediate</span>
+                </label>
+                <label class="pill-option">
+                  <input type="radio" name="difficulty" value="Advanced">
+                  <span class="pill-label">Advanced</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Start Button -->
+          <div class="form-actions">
+            <button type="submit" id="start-btn" class="btn btn-primary btn-large">
+              <span>Start Interview Session</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 2: ACTIVE INTERVIEW VIEW -->
+    <!-- ================================================================= -->
+    <section id="view-interview" class="view-section">
+      <!-- Session Bar -->
+      <div class="session-bar">
+        <div class="session-meta">
+          <span class="meta-tag" id="meta-role-tag">Java Developer</span>
+          <span class="meta-tag outline" id="meta-type-tag">Technical</span>
+          <span class="meta-tag outline" id="meta-difficulty-tag">Intermediate</span>
+          <span class="session-timer" id="session-timer-display" title="Session Time">⏱️ 00:00</span>
+        </div>
+
+        <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmEndInterview()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          </svg>
+          <span>End Interview</span>
+        </button>
+      </div>
+
+      <!-- Question Progress Bar -->
+      <div class="progress-container">
+        <div class="progress-labels">
+          <span class="progress-text" id="progress-text">Question 1 of 5</span>
+          <span class="progress-percentage" id="progress-percentage">20% Completed</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width: 20%;"></div>
+        </div>
+      </div>
+
+      <!-- Question Card -->
+      <div class="question-card">
+        <div class="question-header">
+          <span class="category-badge" id="question-category">Core Concepts</span>
+          <span class="question-number-badge" id="question-number-pill">Question #1</span>
+        </div>
+        <h3 class="question-title" id="question-text">
+          Loading question...
+        </h3>
+      </div>
+
+      <!-- Candidate Answer Card -->
+      <div class="answer-card" id="answer-input-container">
+        <div class="answer-header">
+          <label class="form-label" for="answer-textarea">
+            Your Response:
+          </label>
+          <span class="hint-text">Be specific, articulate mechanisms, and mention examples.</span>
+        </div>
+
+        <textarea 
+          id="answer-textarea" 
+          class="answer-textarea" 
+          rows="7" 
+          placeholder="Type your detailed answer here. Focus on fundamental principles, mechanics, and concrete examples..."
+          oninput="updateAnswerStats()"
+        ></textarea>
+
+        <div class="answer-footer">
+          <div class="stat-counters">
+            <span id="word-count-badge">0 words</span>
+            <span class="counter-separator">•</span>
+            <span id="char-count-badge">0 characters</span>
+          </div>
+
+          <button type="button" id="submit-answer-btn" class="btn btn-primary" onclick="submitCurrentAnswer()">
+            <span class="btn-spinner hidden" id="submit-spinner"></span>
+            <span id="submit-btn-text">Submit Answer</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Evaluated Answer Feedback Card (Appears after submission) -->
+      <div class="feedback-card hidden" id="feedback-card">
+        <div class="feedback-top-banner">
+          <div class="score-display-box">
+            <div class="score-circle" id="score-circle">
+              <span class="score-val" id="feedback-score-val">8.0</span>
+              <span class="score-max">/ 10</span>
+            </div>
+            <div class="score-meta">
+              <h4 class="score-heading">Interview Evaluation</h4>
+              <p class="score-reason" id="feedback-score-reason">Evaluating response...</p>
+              <span class="eval-mode-tag" id="feedback-eval-mode">Demo Mode (Rule-Based Heuristic)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Strengths & Improvements Grid -->
+        <div class="feedback-grid">
+          <div class="feedback-col strengths-col">
+            <h5 class="col-title strengths-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              Key Strengths
+            </h5>
+            <ul class="bullet-list" id="feedback-strengths-list">
+              <li>Identified relevant concepts clearly.</li>
+            </ul>
+          </div>
+
+          <div class="feedback-col improvements-col">
+            <h5 class="col-title improvements-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Areas to Improve
+            </h5>
+            <ul class="bullet-list" id="feedback-improvements-list">
+              <li>Elaborate further with real-world examples.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Sample Improved Answer Section -->
+        <div class="sample-answer-box">
+          <div class="sample-answer-header">
+            <div class="sample-badge">Exemplary Model Answer</div>
+            <span class="sample-subtext">How a top-tier candidate answers this question:</span>
+          </div>
+          <div class="sample-answer-content" id="feedback-sample-answer">
+            Loading sample answer...
+          </div>
+        </div>
+
+        <!-- Next / Advance Control -->
+        <div class="feedback-actions">
+          <button type="button" id="next-question-btn" class="btn btn-primary btn-large" onclick="advanceNextQuestion()">
+            <span class="btn-spinner hidden" id="next-spinner"></span>
+            <span id="next-btn-text">Next Question</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 3: FINAL SESSION REPORT VIEW -->
+    <!-- ================================================================= -->
+    <section id="view-report" class="view-section">
+      <div class="report-header-card">
+        <div class="report-badge">Interview Session Completed</div>
+        <h2 class="report-title">Mock Interview Performance Scorecard</h2>
+        <p class="report-subtitle" id="report-meta-subtitle">
+          Role: Java Developer • Type: Technical • Difficulty: Intermediate
+        </p>
+
+        <!-- Metrics Dashboard Grid -->
+        <div class="metrics-grid">
+          <div class="metric-card primary-metric">
+            <div class="metric-label">Average Score</div>
+            <div class="metric-value" id="report-avg-score">0.0 / 10</div>
+            <div class="metric-hint">Standardized 10-point scale</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Total Points</div>
+            <div class="metric-value" id="report-total-score">0.0 / 50</div>
+            <div class="metric-hint">Cumulative session score</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Questions Evaluated</div>
+            <div class="metric-value" id="report-questions-count">5 of 5</div>
+            <div class="metric-hint">Completed session</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Verdict</div>
+            <div class="metric-verdict" id="report-verdict">Strong Performance</div>
+            <div class="metric-hint" id="report-verdict-desc">Ready for junior roles</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consolidated Strengths and Improvements Cards -->
+      <div class="summary-cards-grid">
+        <div class="summary-card strengths-summary">
+          <h4 class="summary-card-title strengths-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            Consolidated Strengths
+          </h4>
+          <ul class="bullet-list" id="report-strengths-list">
+            <li>Strong technical grasp demonstrated across answered questions.</li>
+          </ul>
+        </div>
+
+        <div class="summary-card improvements-summary">
+          <h4 class="summary-card-title improvements-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            Key Areas for Growth
+          </h4>
+          <ul class="bullet-list" id="report-improvements-list">
+            <li>Review and incorporate real-world examples and trade-offs.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Detailed Session History -->
+      <div class="history-card">
+        <div class="history-header">
+          <h3 class="card-section-title">Session Interview History</h3>
+          <span class="history-sub">Detailed breakdown of all 5 questions, your answers, scores, and sample answers.</span>
+        </div>
+
+        <div class="history-items-container" id="report-history-container">
+          <!-- Dynamically populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Action Footer Controls -->
+      <div class="report-actions-bar">
+        <button type="button" class="btn btn-secondary" onclick="window.print()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Print / Save PDF Report</span>
+        </button>
+
+        <button type="button" class="btn btn-primary btn-large" onclick="resetToSetupView()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          <span>Start New Interview</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =================================================================== -->
+  <!-- MODALS -->
+  <!-- =================================================================== -->
+
+  <!-- Engine Status & API Setup Guide Modal -->
+  <div id="status-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeStatusModal();">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Mock Interview Engine Configuration</h3>
+        <button type="button" class="modal-close-btn" onclick="closeStatusModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-block">
+          <h4>Current Backend Status</h4>
+          <p id="modal-status-desc">
+            {% if status.mode == 'demo' %}
+            <strong>Mode:</strong> Demo Mode (Offline Curated Questions &amp; Heuristic Evaluation)<br>
+            <strong>Status:</strong> No API key is currently detected in <code>.env</code>. The application is completely functional using its built-in Computer Engineering question bank and rule-based evaluation engine.
+            {% else %}
+            <strong>Mode:</strong> AI-Powered Mode ({{ status.provider }})<br>
+            <strong>Model:</strong> {{ status.model }}<br>
+            <strong>Status:</strong> Successfully connected to server-side AI API.
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="info-block">
+          <h4>How to Configure Real AI (Google Gemini - Free Tier)</h4>
+          <ol class="setup-steps-list">
+            <li>Visit <a href="https://aistudio.google.com/" target="_blank" rel="noopener">Google AI Studio</a> and sign in with your Google account.</li>
+            <li>Click <strong>Get API key</strong> and copy your key.</li>
+            <li>Open the <code>.env</code> file in your project folder (created alongside <code>.env.example</code>).</li>
+            <li>Paste your key:
+              <pre><code>GEMINI_API_KEY=AIzaSyYourGeneratedApiKeyHere</code></pre>
+            </li>
+            <li>Restart the Flask server (<code>python app.py</code>). The badge will automatically turn green to indicate <strong>AI-Powered Mode</strong>!</li>
+          </ol>
+        </div>
+
+        <div class="info-block security-note">
+          <div class="sec-icon">🔒</div>
+          <p>
+            <strong>Security Guarantee:</strong> API keys are loaded strictly on the server-side via <code>python-dotenv</code>. 
+            Secrets are never exposed to browser client code and are excluded from Git via <code>.gitignore</code>.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="closeStatusModal()">Close Guide</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Interview Confirmation Modal -->
+  <div id="confirm-end-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeConfirmModal();">
+    <div class="modal-container modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">End Interview Early?</h3>
+        <button type="button" class="modal-close-btn" onclick="closeConfirmModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to conclude the interview now? A final performance report will be generated for the questions you have answered so far.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">Continue Interview</button>
+        <button type="button" class="btn btn-danger" onclick="executeEndInterview()">Yes, End Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p>Mock Interview Agent • Third-Year Computer Engineering Project</p>
+      <p class="footer-sub">Designed with Python Flask, HTML5, CSS3 &amp; Vanilla JavaScript</p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
